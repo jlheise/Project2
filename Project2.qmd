@@ -5,6 +5,116 @@ format: html
 editor: visual
 ---
 
+## Load Packages
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+# Load necessary packages
+install.packages("shiny")
+install.packages("jsonlite")
+install.packages("tidyverse")
+install.packages("httr")
+install.packages("ggDoubleHeat")
+library(shiny)
+library(jsonlite)
+library(tidyverse)
+library(httr)
+library(ggplot2)
+library(ggDoubleHeat)
+```
+
+## Query the API
+
+```{r}
+# Allow user to request at least 6 different types of data (different endpoints, modify endpoints)
+
+
+
+#keywords <- "analyst"
+#location <- ""
+#minSalary <- ""
+#employer <- ""
+#expiration <- ""
+#recent <- TRUE
+
+
+
+# Use GET from httr package
+query_func <- function(keywords="", location="", minSalary=""){
+  search_URL <- "https://www.reed.co.uk/api/1.0/search?"
+  criteria_URL <- paste0(search_URL, "keywords=", keywords,
+                         "&locationName=", location)
+  APIkey <- "625d2b5b-7b88-4f51-864f-134f416e6dbe"
+  return <- httr::GET(criteria_URL, 
+            httr::authenticate(user = APIkey, password = "", type = "basic"))
+  parsed <- fromJSON(rawToChar(return$content))
+  parsed_return <- as_tibble(parsed$results)
+  subset(parsed_return, )
+  filtered_return <- parsed_return %>% 
+    filter((minimumSalary > minSalary))
+}
+results <- query_func()
+
+```
+
+## Summarizing Data
+
+### Contingency Tables & Numerical Summaries
+
+```{r}
+# Create contingency tables
+# Number of jobs with selected criteria
+title_table <- table(results$jobTitle)
+print(title_table)
+loc_employer_table <- table(results$locationName, results$employerName)
+print(loc_employer_table)
+
+# Create numerical summaries for some quantitative variables at each setting of some of your categorical variables
+location_table <- table(results$locationName)
+print(location_table)
+employer_table <- table(results$employerName)
+print(employer_table)
+```
+
+### Plots
+
+```{r}
+# Create at least four plots utilizing coloring, grouping, etc. All plots should have nice labels and titles. (one should be a plot we did not cover in class)
+
+# Posting date/employer- see if there are trends in who is hiring
+postings_by_month <- results %>%
+  select(date, employerName) %>%
+  mutate(month = case_when(
+    substring(date, 4,5) == "01" ~ "January",
+    substring(date, 4,5) == "02" ~ "February",
+    substring(date, 4,5) == "03" ~ "March",
+    substring(date, 4,5) == "04" ~ "April",
+    substring(date, 4,5) == "05" ~ "May",
+    substring(date, 4,5) == "06" ~ "June",
+    substring(date, 4,5) == "07" ~ "July",
+    substring(date, 4,5) == "08" ~ "August",
+    substring(date, 4,5) == "09" ~ "September",
+    substring(date, 4,5) == "10" ~ "October",
+    substring(date, 4,5) == "11" ~ "November",
+    substring(date, 4,5) == "12" ~ "December",
+  )) %>%
+  count(month, employerName)
+print(postings_by_month)
+
+# Heatmap of posting date/employer data
+heatmap <- ggplot(data = postings_by_month, aes(x = month, y = employerName, fill = n)) +
+  geom_tile() +
+  labs(title = "Correlation Heatmap: Number of jobs posted by each company by month",
+       x = "Month",
+       y = "Company")+
+  scale_fill_distiller(palette = "Spectral")+
+  scale_y_discrete(label = abbreviate, guide = guide_axis(n.dodge = 2))
+print(heatmap)
+
+# Company and maximum salary observations
+```
+
+## App
+
 ```{r}
 
 ```
