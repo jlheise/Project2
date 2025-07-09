@@ -88,10 +88,8 @@ print(employer_table)
 ### Plots
 
 ```{r}
-# Create at least four plots utilizing coloring, grouping, etc. All plots should have nice labels and titles. (one should be a plot we did not cover in class)
-
 # Posting date/employer- see if there are trends in who is hiring
-postings_by_month <- results %>%
+postings_by_month <- parsed_return %>%
   select(date, employerName) %>%
   mutate(month = case_when(
     substring(date, 4,5) == "01" ~ "January",
@@ -120,11 +118,16 @@ heatmap <- ggplot(data = postings_by_month, aes(x = month, y = employerName, fil
   scale_y_discrete(label = abbreviate, guide = guide_axis(n.dodge = 2))
 print(heatmap)
 
-# Company and maximum salary observations
-```
+# Company and maximum salary observations (need to summarize by company and drop NA values)
+company_maxSal <- ggplot(data = parsed_return, aes(x=employerName, y = maximumSalary)) +
+    geom_point() +
+    labs(title = "Maximum Salary for Jobs by Company",
+       x = "Company",
+       y = "Salary") +
+    scale_x_discrete(label = abbreviate, guide = guide_axis(n.dodge = 2))
+print(company_maxSal)
 
-## App
-
-```{r}
-
+# Number of applications by jobTitle 
+#apps_by_job <- ggplot(data = parsed_return, aes()) +
+  #geom_histogram()
 ```

@@ -47,8 +47,8 @@ ui <- fluidPage(
         tableOutput("Jobs")
       ),
       tabPanel("Data Exploration",
-        h2("Correlation Heatmap: Number of jobs posted by each company by month"),
-        plotOutput("Heatmap")
+        selectInput("plot", "Select a Plot Type:", choices = c("Heatmap", "Max Salary by Company")),
+        plotOutput("plot")
       )
     )
 )
@@ -59,8 +59,9 @@ server <- function(input, output, session) {
     output$Jobs <- renderTable({query_func(input$keyword, input$location, input$employer, input$minimumSalary)
     })
   })
+# Render plot based on dropdown selection
   reactive({
-    output$Heatmap <- renderPlot({
+    output$plot <- renderPlot({
       ggplot(data = postings_by_month, aes(x = month, y = employerName, fill = n)) +
         geom_tile() +
         labs(title = "Correlation Heatmap: Number of jobs posted by each company by month",
