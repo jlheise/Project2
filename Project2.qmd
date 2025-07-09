@@ -58,10 +58,9 @@ query_func <- function(keyword="", location="", employer="", minSalary=""){
             httr::authenticate(user = APIkey, password = "", type = "basic"))
   parsed <- fromJSON(rawToChar(return$content))
   parsed_return <- as_tibble(parsed$results)
-  subset(parsed_return, )
-  filtered_return <- parsed_return %>% 
-    filter((employerName == employer)) %>%
-    filter((minimumSalary > minSalary))
+  #filtered_return <- parsed_return %>% 
+   # filter((employerName == employer)) %>%
+    #filter((minimumSalary > minSalary))
 }
 results <- query_func()
 

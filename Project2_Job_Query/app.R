@@ -13,7 +13,7 @@ library(tidyverse)
 library(httr)
 library(ggplot2)
 library(ggDoubleHeat)
-source(helpers.R)
+source("helpers.R")
 # Define UI for application
 ui <- fluidPage(
     titlePanel("Reed Job Query"),
@@ -43,16 +43,33 @@ ui <- fluidPage(
         ),
         h2("Minimum Salary Expected"),
         p("Enter the minimum salary you are looking for"),
-        textInput("minSalary", "Enter Minimum Salary:")
+        textInput("minimumSalary", "Enter Minimum Salary:"),
+        tableOutput("Jobs")
       ),
-      tabPanel("Data Exploration")
-    ),
-    mainPanel(tableOutput("Jobs"))
+      tabPanel("Data Exploration",
+        h2("Correlation Heatmap: Number of jobs posted by each company by month"),
+        plotOutput("Heatmap")
+      )
+    )
 )
 
 # Define server logic
-server <- function(input, output) {
-  output$Jobs <- query_func(input$keyword, input$location, imput$employer, input$minSalary)
+server <- function(input, output, session) {
+  reactive({
+    output$Jobs <- renderTable({query_func(input$keyword, input$location, input$employer, input$minimumSalary)
+    })
+  })
+  reactive({
+    output$Heatmap <- renderPlot({
+      ggplot(data = postings_by_month, aes(x = month, y = employerName, fill = n)) +
+        geom_tile() +
+        labs(title = "Correlation Heatmap: Number of jobs posted by each company by month",
+           x = "Month",
+           y = "Company")+
+        scale_fill_distiller(palette = "Spectral")+
+        scale_y_discrete(label = abbreviate, guide = guide_axis(n.dodge = 2))
+    })
+  })
 }
 
 # Run the application 
